@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 module Tree
   class RedBlackNode
+    include Enumerable
+
     attr_accessor :left, :right, :key, :parent, :color
 
     def initialize(value = nil, color = :RED)

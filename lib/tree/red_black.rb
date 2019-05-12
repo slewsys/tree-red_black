@@ -2,6 +2,8 @@ require 'tree/red_black/red_black_node'
 
 module Tree
   class RedBlack
+    include Enumerable
+
     attr_accessor :root, :size
 
     def initialize(value = nil)

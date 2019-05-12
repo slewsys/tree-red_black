@@ -3,7 +3,7 @@
 require 'tree/red_black'
 require 'benchmark'
 
-values = [*0..10].shuffle
+values = [*0..3]
 # values = [2, 10, 4, 5, 6, 3, 1, 0, 9, 8, 7]
 # values = [0, 2, 6, 4, 5, 3, 7, 1, 9, 8, 10]
 puts "values.size: #{values.size}"
@@ -26,9 +26,9 @@ Benchmark.bm do |benchmark|
     end
   end
 
-  benchmark.report("dup:") do
-    rbt_copy = rbt.dup
-  end
+  # benchmark.report("dup:") do
+  #   rbt_copy = rbt.dup
+  # end
 end
 
 
@@ -38,32 +38,32 @@ end
 # rbt_copy.insert(values.size)
 
 
-# File.open('dot.txt', 'w') do |file|
-#   file.write "graph \"\"\n{\n  label=\"Red-Black Tree\"\n"
+File.open('dot.txt', 'w') do |file|
+  file.write "graph \"\"\n{\n  label=\"Red-Black Tree\"\n"
 
-#   i = 0
-#   rbt_copy.each do |node|
-#     file.write("  #{node.key} [style=filled,color=#{node.color.to_s.downcase},fontcolor=white];\n")
-#     file.write("  #{node.key} -- %s;\n" % [node.left ? "#{node.left.key}" :   'NULL' + (i += 1).to_s])
-#     file.write("  #{node.key} -- %s;\n" % [node.right ? "#{node.right.key}" : 'NULL' + (i += 1).to_s])
-#   end
-#   i.times do |n|
-#     file.write("  NULL#{n + 1} [fontsize=6,shape=box,width=0.2,height=0.2,style=filled,color=gray,label=\"NULL\"];\n")
-#   end
-#   file.write("}\n")
-# end
+  i = 0
+  rbt.each do |node|
+    file.write("  #{node.key} [style=filled,color=#{node.color.to_s.downcase},fontcolor=white];\n")
+    file.write("  #{node.key} -- %s;\n" % [node.left ? "#{node.left.key}" :   'NULL' + (i += 1).to_s])
+    file.write("  #{node.key} -- %s;\n" % [node.right ? "#{node.right.key}" : 'NULL' + (i += 1).to_s])
+  end
+  i.times do |n|
+    file.write("  NULL#{n + 1} [fontsize=6,shape=box,width=0.2,height=0.2,style=filled,color=gray,label=\"NULL\"];\n")
+  end
+  file.write("}\n")
+end
 
-# system 'dot -Tpng -odot.png dot.txt'
-# system 'open dot.png'
+system 'dot -Tpng -odot.png dot.txt'
+system 'open dot.png'
 
 # puts "root: #{rbt_copy.key}"
-puts "root: #{rbt_copy.root.key}"
-puts "size: #{rbt_copy.size}"
+puts "root: #{rbt.root.key}"
+puts "size: #{rbt.size}"
 
-p rbt_copy.each.map(&:key)
+p rbt.each.map(&:key)
 
 paths = {}
-rbt_copy.pre_order do |node; path, count, ancestor|
+rbt.pre_order do |node; path, count, ancestor|
   if node.left.nil? || node.right.nil?
     path = []
     count = 0
@@ -138,12 +138,12 @@ Benchmark.bm do |benchmark|
   # rbt_copy = rbt.dup
   benchmark.report("delete:") do
     # values.each { |v| rbt_copy = rbt_copy.delete_red_black(v) }
-    values.each { |v| rbt_copy.delete(v) }
+    values.each { |v| rbt.delete(v) }
   end
 end
 
 # # p "deleted: #{deleted}"
-p rbt_copy.inspect
+p rbt.inspect
 
 # print "Value to delete? "
 # n = gets.to_i
