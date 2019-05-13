@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 module Tree
   class RedBlackNode
     include Enumerable
@@ -6,6 +5,8 @@ module Tree
     attr_accessor :left, :right, :key, :parent, :color
 
     def initialize(value = nil, color = :RED)
+      raise "color must be :RED or :BLACK" unless [:RED, :BLACK].include?(color)
+
       @left = @right = @parent = nil
       @key = value
       @color = color
@@ -161,19 +162,21 @@ module Tree
         grandparent.color = :RED
         grandparent.color_insert
       else
-        node = if self == parent.right && parent == grandparent.left
+        node = if self == parent.right && parent == grandparent&.left
                  parent.rotate_left.left
-               elsif self == parent.left && parent == grandparent.right
+               elsif self == parent.left && parent == grandparent&.right
                  parent.rotate_right.right
                else
                  self
                end
         node.parent.color = :BLACK
-        node.grandparent.color = :RED
-        if node == node.parent.left
-          node.grandparent.rotate_right
-        else
-          node.grandparent.rotate_left
+        if node.grandparent
+          node.grandparent.color = :RED
+          if node == node.parent.left
+            node.grandparent.rotate_right
+          else
+            node.grandparent.rotate_left
+          end
         end
       end
     end

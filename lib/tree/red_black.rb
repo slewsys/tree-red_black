@@ -4,7 +4,7 @@ module Tree
   class RedBlack
     include Enumerable
 
-    attr_accessor :root, :size
+    attr_accessor :root, :size, :allow_duplicates
 
     def initialize(allow_duplicates = true)
       @root = nil
@@ -53,6 +53,7 @@ module Tree
     def dup
       copy = RedBlack.new
       copy.size = size
+      copy.allow_duplicates = allow_duplicates
       copy.root = root.dup
       copy
     end

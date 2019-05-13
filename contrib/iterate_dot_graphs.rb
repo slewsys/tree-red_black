@@ -3,7 +3,7 @@
 require 'tree/red_black'
 require 'benchmark'
 
-values = [*0..0]
+values = [*0..10]
 # values = [2, 10, 4, 5, 6, 3, 1, 0, 9, 8, 7]
 # values = [0, 2, 6, 4, 5, 3, 7, 1, 9, 8, 10]
 puts "values.size: #{values.size}"
@@ -145,13 +145,13 @@ end
 # # p "deleted: #{deleted}"
 # p rbt.inspect
 
-print "Value to insert? "
+print "Value to delete? "
 n = gets.to_i
 
 toggle = 0
 while n >= 0
   # rbt_copy = rbt.delete_red_black(n)
-  rbt.insert(n)
+  rbt.delete(n)
 
   name = toggle == 0  ? 'dot2' : 'dot'
   File.open(name + '.txt', 'w') do |file|
@@ -173,7 +173,7 @@ while n >= 0
   system  'dot -Tpng -o' + name + '.png ' + name + '.txt'
   system 'open ' + name + '.png'
 
-  print "Value to insert? "
+  print "Value to delete? "
   n = gets.to_i
   toggle ^= 1
 end
