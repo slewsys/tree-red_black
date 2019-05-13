@@ -6,18 +6,19 @@ module Tree
 
     attr_accessor :root, :size
 
-    def initialize(value = nil)
-      if value.nil?
-        @root = nil
-        @size = 0
-      else
-        @root = RedBlackNode.new(value, :BLACK)
-        @size = 1
-      end
+    def initialize(allow_duplicates = true)
+      @root = nil
+      @size = 0
+      @allow_duplicates = allow_duplicates
+    end
+
+    def allow_duplicates?
+      @allow_duplicates
     end
 
     def insert(value)
-      new_root = root.nil? ? RedBlackNode.new(value, :BLACK) : root.insert_red_black(value)
+      new_root = (root.nil? ? RedBlackNode.new(value, :BLACK) :
+                  root.insert_red_black(value, @allow_duplicates))
       unless new_root.nil?
         @root = new_root
         @size += 1
@@ -33,10 +34,6 @@ module Tree
       end
       @root = nil if size == 0
       self
-    end
-
-    def find(value)
-      root.nil? ? nil : root.find(value)
     end
 
     def pre_order(&block)

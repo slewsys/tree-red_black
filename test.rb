@@ -3,7 +3,7 @@
 require 'tree/red_black'
 require 'benchmark'
 
-values = [*0..3]
+values = [*0..0]
 # values = [2, 10, 4, 5, 6, 3, 1, 0, 9, 8, 7]
 # values = [0, 2, 6, 4, 5, 3, 7, 1, 9, 8, 10]
 puts "values.size: #{values.size}"
@@ -131,52 +131,52 @@ end
 
 # deleted = []
 
-Benchmark.bm do |benchmark|
-  # benchmark.report("koi:") do
-  #   delete_keys_of_interest(rbt_copy, deleted)
-  # end
-  # rbt_copy = rbt.dup
-  benchmark.report("delete:") do
-    # values.each { |v| rbt_copy = rbt_copy.delete_red_black(v) }
-    values.each { |v| rbt.delete(v) }
-  end
-end
+# Benchmark.bm do |benchmark|
+#   # benchmark.report("koi:") do
+#   #   delete_keys_of_interest(rbt_copy, deleted)
+#   # end
+#   # rbt_copy = rbt.dup
+#   benchmark.report("delete:") do
+#     # values.each { |v| rbt_copy = rbt_copy.delete_red_black(v) }
+#     values.each { |v| rbt.delete(v) }
+#   end
+# end
 
 # # p "deleted: #{deleted}"
-p rbt.inspect
+# p rbt.inspect
 
-# print "Value to delete? "
-# n = gets.to_i
+print "Value to insert? "
+n = gets.to_i
 
-# toggle = 0
-# while n >= 0
-#   rbt_copy = rbt_copy.delete_red_black(n)
-#   # rbt_copy.delete(n)
+toggle = 0
+while n >= 0
+  # rbt_copy = rbt.delete_red_black(n)
+  rbt.insert(n)
 
-#   name = toggle == 0  ? 'dot2' : 'dot'
-#   File.open(name + '.txt', 'w') do |file|
-#     file.write "graph \"\"\n{\n  label=\"Red-Black Tree - #{n}\"\n"
-#     # file.write "  labelfontsize=8.0\n"
+  name = toggle == 0  ? 'dot2' : 'dot'
+  File.open(name + '.txt', 'w') do |file|
+    file.write "graph \"\"\n{\n  label=\"Red-Black Tree - #{n}\"\n"
+    # file.write "  labelfontsize=8.0\n"
 
-#     i = 0
-#     rbt_copy.each do |node|
-#       file.write("  #{node.key} [style=filled,color=#{node.color.to_s.downcase},fontcolor=white];\n")
-#       file.write("  #{node.key} -- %s;\n" % [node.left ? "#{node.left.key}" :   'NULL' + (i += 1).to_s])
-#       file.write("  #{node.key} -- %s;\n" % [node.right ? "#{node.right.key}" : 'NULL' + (i += 1).to_s])
-#     end
-#     i.times do |n|
-#       file.write("  NULL#{n + 1} [fontsize=6,shape=box,width=0.2,height=0.2,style=filled,color=gray,label=\"NULL\"];\n")
-#     end
-#     file.write("}\n")
-#   end
+    i = 0
+    rbt.each do |node|
+      file.write("  #{node.key} [style=filled,color=#{node.color.to_s.downcase},fontcolor=white];\n")
+      file.write("  #{node.key} -- %s;\n" % [node.left ? "#{node.left.key}" :   'NULL' + (i += 1).to_s])
+      file.write("  #{node.key} -- %s;\n" % [node.right ? "#{node.right.key}" : 'NULL' + (i += 1).to_s])
+    end
+    i.times do |n|
+      file.write("  NULL#{n + 1} [fontsize=6,shape=box,width=0.2,height=0.2,style=filled,color=gray,label=\"NULL\"];\n")
+    end
+    file.write("}\n")
+  end
 
-#   system  'dot -Tpng -o' + name + '.png ' + name + '.txt'
-#   system 'open ' + name + '.png'
+  system  'dot -Tpng -o' + name + '.png ' + name + '.txt'
+  system 'open ' + name + '.png'
 
-#   print "Value to delete? "
-#   n = gets.to_i
-#   toggle ^= 1
-# end
+  print "Value to insert? "
+  n = gets.to_i
+  toggle ^= 1
+end
 
 # values.delete(n)
 # values.each do |v|

@@ -11,6 +11,10 @@ module Tree
       @color = color
     end
 
+    def <=>(other)
+      key <=> other.key
+    end
+
     def sibling
       self == parent&.left ? parent&.right : parent&.left
     end
@@ -23,8 +27,8 @@ module Tree
       parent&.sibling
     end
 
-    def insert_red_black(value)
-      node = insert_key(value)
+    def insert_red_black(value, allow_duplicates = true)
+      node = allow_duplicates ? insert_key(value) : insert_unique_key(value)
 
       return nil if node.nil?
 
@@ -70,18 +74,6 @@ module Tree
       node
     end
 
-    def find(value)
-      if key.nil?
-        nil
-      elsif value > key
-        right ? right.find(value) : nil
-      elsif value < key
-        left ? left.find(value) : nil
-      else
-        self
-      end
-    end
-
     def pre_order(&block)
       return enum_for(:pre_order) unless block_given?
 
@@ -115,7 +107,7 @@ module Tree
       if key.nil?
         @key = value
         self
-      elsif value > key
+      elsif value >= key
         if right
           right.insert_key(value)
         else
@@ -123,9 +115,32 @@ module Tree
           @right.parent = self
           right
         end
-      elsif value < key
+      else
         if left
           left.insert_key(value)
+        else
+          @left = RedBlackNode.new(value)
+          @left.parent = self
+          left
+        end
+      end
+    end
+
+    def insert_unique_key(value)
+      if key.nil?
+        @key = value
+        self
+      elsif value > key
+        if right
+          right.insert_unique_key(value)
+        else
+          @right = RedBlackNode.new(value)
+          @right.parent = self
+          right
+        end
+      elsif value < key
+        if left
+          left.insert_unique_key(value)
         else
           @left = RedBlackNode.new(value)
           @left.parent = self
@@ -228,8 +243,7 @@ module Tree
 
         child_sibling.color = color
         @color = :BLACK
-        child_sibling.left.color = :BLACK if child_sibling.left
-        puts "!! child_sibling.left == nil" if child_sibling.left.nil?
+        child_sibling.left.color = :BLACK # if child_sibling.left
         rotate_right
       end
     end
@@ -273,8 +287,7 @@ module Tree
 
         child_sibling.color = color
         @color = :BLACK
-        child_sibling.right.color = :BLACK if child_sibling.right
-        puts "!! child_sibling.right == nil" if child_sibling.right.nil?
+        child_sibling.right.color = :BLACK # if child_sibling.right
         rotate_left
       end
     end
