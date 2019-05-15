@@ -1,0 +1,10 @@
+dist: xenial
+language: ruby
+rvm:
+  - 2.5.0
+sudo: true
+before_install:
+  - gem update --system
+  - gem install bundler -v 2.0.1
+script:
+  - bundle exec rspec spec && gem build tree-red_black.gemspec && gem install tree-red_black*gem

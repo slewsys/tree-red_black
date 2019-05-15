@@ -92,7 +92,7 @@ module Tree
     end
 
     def dup
-      copy = RedBlackNode.new(key, color)
+      copy = RedBlackNode.new(key.dup, color)
       if left
         copy.left = left.dup
         copy.left.parent = copy

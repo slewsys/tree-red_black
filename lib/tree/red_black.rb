@@ -16,23 +16,27 @@ module Tree
       @allow_duplicates
     end
 
-    def insert(value)
-      new_root = (root.nil? ? RedBlackNode.new(value, :BLACK) :
-                  root.insert_red_black(value, @allow_duplicates))
-      unless new_root.nil?
-        @root = new_root
-        @size += 1
+    def insert(*values)
+      values.each do |value; new_root|
+        new_root = (root.nil? ? RedBlackNode.new(value, :BLACK) :
+                    root.insert_red_black(value, @allow_duplicates))
+        unless new_root.nil?
+          @root = new_root
+          @size += 1
+        end
       end
       self
     end
 
-    def delete(value)
-      new_root = root.nil? ? nil : root.delete_red_black(value)
-      unless new_root.nil?
-        @root = new_root
-        @size -= 1
+    def delete(*values)
+      values.each do |value; new_root|
+        new_root = root.nil? ? nil : root.delete_red_black(value)
+        unless new_root.nil?
+          @root = new_root
+          @size -= 1
+        end
+        @root = nil if size == 0
       end
-      @root = nil if size == 0
       self
     end
 
