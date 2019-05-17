@@ -10,8 +10,8 @@ module Tree
   # are desired at arbitrary positions.
   #
   # The implementation differs slightly from the Wikipedia description
-  # referenced above. In particular, leaf nodes are nil, which affects the
-  # details of node deletion.
+  # referenced above. In particular, leaf nodes are +nil+, which
+  # affects the details of node deletion.
   #
   # While it's possible to use class Tree::RedBlackNode independently
   # of Tree::RedBlack, it's strongly recommended that Tree::RedBlack

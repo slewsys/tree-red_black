@@ -15,8 +15,8 @@ module Tree
   # are desired at arbitrary positions.
   #
   # The implementation differs slightly from the Wikipedia description
-  # referenced above. In particular, leaf nodes are nil, which affects the
-  # details of node deletion.
+  # referenced above. In particular, leaf nodes are +nil+, which
+  # affects the details of node deletion.
 
   class RedBlack
     include Enumerable
@@ -27,8 +27,8 @@ module Tree
     # Returns a new, empty Red-Black tree. If option +allow_duplicates+ is
     # +false+, then only unique values are inserted in a Red-Black tree.
     #
-    # A Red-Black tree exposes parameters +root+, the root node of a tree, and
-    # +size+, the number of nodes in the tree.
+    # A Red-Black tree exposes parameters +root+, the root node of a
+    # tree, and +size+, the number of nodes in the tree.
     #
     # === Example
     #

@@ -2,24 +2,25 @@
 
 # Tree::RedBlack
 
-__Tree::RedBlack__ is a pure-Ruby implementation of a
-[Red-Black tree](https://en.wikipedia.org/wiki/Red–black_tree) --
-i.e., a self-balancing binary search tree with
-[O(log n)](https://en.wikipedia.org/wiki/Big-O_notation)
-search, insert and delete operations. It is appropriate for
-maintaining an ordered collection where insertion and deletion
-are desired at arbitrary positions.
+The __Tree::RedBlack__ library is a pure-Ruby implementation of
+a [Red-Black tree](https://en.wikipedia.org/wiki/Red–black_tree) --
+i.e., a self-balancing binary search tree
+with [O(log n)](https://en.wikipedia.org/wiki/Big-O_notation) search,
+insert and delete operations. It is appropriate for maintaining an
+ordered collection where insertion and deletion are desired at
+arbitrary positions.
 
 The implementation differs slightly from the Wikipedia description
-referenced above. In particular, leaf nodes are nil, which affects the
+referenced above. In particular, leaf nodes are `nil`, which affects the
 details of node deletion.
 
 ## Installation
-With a recent very of the
-[Ruby](https://www.ruby-lang.org/en/)
-interpreter installed, run the following commands from a Unix shell:
+With a recent version of the [Ruby](https://www.ruby-lang.org/en/)
+interpreter installed (e.g., ruby 2.5), run the following commands
+from a Unix shell:
+
 ```bash
-git clone https://github.com/slewsys/tree-red_black
+git clone git@github.com:slewsys/tree-red_black.git
 cd tree-red_black
 bundle
 rake build
@@ -27,8 +28,15 @@ gem install pkg/tree-red_black*.gem
 ```
 
 The RSpec test suite can be run with:
+
 ```bash
 bundle exec rspec spec
+```
+
+To build RDoc documentation, use:
+
+```bash
+rake rdoc
 ```
 
 ## API
@@ -38,10 +46,11 @@ bundle exec rspec spec
 Returns a new, empty Red-Black tree. If option `allow_duplicates` is
 `false`, then only unique values are inserted in a Red-Black tree.
 
-A Red-Black tree exposes parameters `root`, the root node of a tree, and
-`size`, the number of nodes in the tree.
+A Red-Black tree exposes parameters `root`, the root node of a tree,
+and `size`, the number of nodes in the tree.
 
 Example:
+
 ```ruby
 require 'tree/red_black'
 
@@ -68,6 +77,7 @@ by `key` value. Nodes can also be traversed by method `pre_order`,
 e.g., to generate paths in the tree.
 
 Example:
+
 ```ruby
 require 'tree/red_black'
 
@@ -84,6 +94,7 @@ rbt.select { |node| node.key % 2 == 0 }.map(&:key)
 Deletes a value or sequence of values from a Red-Black tree.
 
 Example:
+
 ```ruby
 require 'tree/red_black'
 
@@ -96,9 +107,11 @@ rbt.map(&:key)          #=> [1, 2, 3, 9, 10]
 ```
 ### pre_order --> node_enumerator
 
-Returns an enumerator for nodes in a Red-Black tree by pre-order traversal.
+Returns an enumerator for nodes in a Red-Black tree by pre-order
+traversal.
 
 Example:
+
 ```ruby
 require 'tree/red_black'
 
@@ -114,6 +127,7 @@ Returns an enumerator for nodes in a Red-Black tree by in-order
 traversal. The `each` method is aliased to `in_order`.
 
 Example:
+
 ```ruby
 require 'tree/red_black'
 
@@ -125,10 +139,11 @@ rbt.in_order.map(&:key)  #=> [1, 2, ... 9, 10]
 
 ### dup --> red_black_tree
 
-Returns a deep copy of a Red-Black tree, provided that the
-`dup` method for values in the tree is also a deep copy.
+Returns a deep copy of a Red-Black tree, provided that the `dup`
+method for values in the tree is also a deep copy.
 
 Example:
+
 ```ruby
 require 'tree/red_black'
 

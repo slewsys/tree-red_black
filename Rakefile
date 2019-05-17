@@ -7,6 +7,6 @@ RSpec::Core::RakeTask.new(:spec)
 task :default => :spec
 
 RDoc::Task.new do |rdoc|
-  rdoc.main = 'lib/tree/red_black.rb'
-  rdoc.options << '--markup'
+  rdoc.main = "README.md"
+  rdoc.rdoc_files.include("lib/ *.rb")
 end
