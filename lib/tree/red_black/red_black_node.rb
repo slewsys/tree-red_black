@@ -1,8 +1,48 @@
+# -*- coding: utf-8 -*-
 module Tree
+  ##
+  # Tree::RedBlackNode is a pure-Ruby implementation of a
+  # {Red-Black tree}[https://en.wikipedia.org/wiki/Red–black_tree] --
+  # i.e., a self-balancing binary search tree with
+  # {O(log n)}[https://en.wikipedia.org/wiki/Big-O_notation]
+  # search, insert and delete operations. It is appropriate for
+  # maintaining an ordered collection where insertion and deletion
+  # are desired at arbitrary positions.
+  #
+  # The implementation differs slightly from the Wikipedia description
+  # referenced above. In particular, leaf nodes are nil, which affects the
+  # details of node deletion.
+  #
+  # While it's possible to use class Tree::RedBlackNode independently
+  # of Tree::RedBlack, it's strongly recommended that Tree::RedBlack
+  # be used instead.
+
+
   class RedBlackNode
     include Enumerable
 
     attr_accessor :left, :right, :key, :parent, :color
+
+    ##
+    # Returns a new Red-Black tree node with +key+ parameter set to
+    # option +value+, if given, otherwise +nil+. Option +color+, if
+    # specified, must be either <tt>:RED</tt> or <tt>:BLACK</tt>.
+    #
+    # In addition to the +key+ parameter, a Red-Black tree node exposes
+    # parameters +color+, the node's color, +parent+, the node's
+    # parent, and +left+ and +right+, the node's left and right
+    # children, respectively.
+    #
+    # === Example
+    #
+    #     require 'tree/red_black'
+    #
+    #     root = Tree::RedBlackNode.new(10)
+    #     p root.key              -> 10
+    #     p root.color            -> :RED
+    #     p root.parent           -> nil
+    #     p root.left             -> nil
+    #     p root.right            -> nil
 
     def initialize(value = nil, color = :RED)
       raise "color must be :RED or :BLACK" unless [:RED, :BLACK].include?(color)
@@ -12,21 +52,59 @@ module Tree
       @color = color
     end
 
-    def <=>(other)
+    def <=>(other) # :nodoc:
       key <=> other.key
     end
 
-    def sibling
+    def sibling # :nodoc:
       self == parent&.left ? parent&.right : parent&.left
     end
 
-    def grandparent
+    def grandparent # :nodoc:
       parent&.parent
     end
 
-    def parent_sibling
+    def parent_sibling # :nodoc:
       parent&.sibling
     end
+
+    ##
+    # Inserts the given value in a Red-Black tree whose root node is
+    # self. If the +key+ parameter of the root node is nil, then value
+    # is assigned to +key+. Otherwise, value is stored in new
+    # Tree::RedBlackNode which is then inserted in the tree; the tree
+    # is then re-balanced as needed, and the root of the balanced tree
+    # returned.
+
+    # Since a Red-Black tree maintains an ordered, Enumerable
+    # collection, every value inserted must be comparable with every
+    # other value. Methods +each+, +map+, +select+, +find+, +sort+,
+    # etc., can be applied to a Red-Black tree's root node to iterate
+    # over all nodes in the tree.
+    #
+    # The individual nodes yielded by enumeration respond to method
+    # +key+ to retrieve the value stored in that node. Method +each+,
+    # in particular, is aliased to +in_order+, so that nodes are
+    # sorted in ascending order by +key+ value. Nodes can also be
+    # traversed by method +pre_order+, e.g., to generate paths in the
+    # tree.
+    #
+    # === Example
+    #
+    #     require 'tree/red_black'
+    #
+    #     root = Tree::RedBlackNode.new
+    #     p root.key                      -> nil
+    #     root = root.insert_red_black(0)
+    #     p root.key                      -> 0
+    #     root = root.insert_red_black(1)
+    #     p root.key                      -> 0
+    #     p root.left                     -> nil
+    #     p root.right.key                -> 1
+    #     root = root.insert_red_black(2)
+    #     p root.key                      -> 1
+    #     p root.left.key                 -> 0
+    #     p root.right.key                -> 2
 
     def insert_red_black(value, allow_duplicates = true)
       node = allow_duplicates ? insert_key(value) : insert_unique_key(value)
@@ -40,6 +118,26 @@ module Tree
       end
       node
     end
+
+    ##
+    # Deletes the given value from a Red-Black tree whose root node is
+    # self. If the tree has only one node and its +key+ parameter
+    # matches value, then that node's +key+ parameter is set to nil.
+    # Otherwise, the first node found whose +key+ matches value is
+    # removed from the tree, and the tree is re-balanced. The root of
+    # the balanced tree is returned.
+    #
+    # === Example
+    #
+    #     require 'tree/red_black'
+    #
+    #     root = [*1..10].reduce(Tree::RedBlackNode.new) do |acc, v|
+    #       acc.insert_red_black(v)
+    #     end
+    #     root = [*4..8].reduce(root) do |acc, v|
+    #       acc.delete_red_black(v)
+    #     end
+    #     root.map(&:key)                 -> [1, 2, 3, 9, 10]
 
     def delete_red_black(value)
       if key.nil?
@@ -59,7 +157,7 @@ module Tree
       end
     end
 
-    def minimum
+    def minimum # :nodoc:
       node = self
       while node.left
         node = node.left
@@ -67,13 +165,25 @@ module Tree
       node
     end
 
-    def maximum
+    def maximum # :nodoc:
       node = self
       while node.right
         node = node.right
       end
       node
     end
+
+    ##
+    # Returns an enumerator for nodes in a Red-Black tree by pre-order
+    # traversal.
+    #
+    # === Example
+    #     require 'tree/red_black'
+    #
+    #     root = [*1..10].reduce(Tree::RedBlackNode.new) do |acc, v|
+    #       acc.insert_red_black(v)
+    #     end
+    #     root.pre_order.map(&:key)        -> [4, 2, 1, 3, 6, 5, 8, 7, 9, 10]
 
     def pre_order(&block)
       return enum_for(:pre_order) unless block_given?
@@ -83,6 +193,19 @@ module Tree
       right.pre_order(&block) if right
     end
 
+    ##
+    # Returns an enumerator for nodes in a Red-Black tree by in-order
+    # traversal. The +each+ method is aliased to +in_order+
+    #
+    # === Example
+    #     require 'tree/red_black'
+    #
+    #     shuffled_values = [*1..10].shuffle
+    #     root = shuffled_values.reduce(Tree::RedBlackNode.new) do |acc, v|
+    #       acc.insert_red_black(v)
+    #     end
+    #     root.pre_order.map(&:key)        -> [1, 2, ..., 10]
+
     def in_order(&block)
       return enum_for(:in_order) unless block_given?
 
@@ -90,6 +213,20 @@ module Tree
       yield self
       right.in_order(&block) if right
     end
+
+    # Returns a deep copy of a Red-Black tree, provided that the
+    # +dup+ method for values in the tree is also a deep copy.
+    #
+    # === Example
+    #
+    #     require 'tree/red_black'
+    #
+    #     root = Tree::RedBlackNode.new({a: 1, b: 2})
+    #     root_copy = root.dup
+    #     p root.key                       -> {:a=>1, :b=>2}
+    #     p root.key.delete(:a)            -> 1
+    #     p root.key                       -> {:b=>2}
+    #     p root_copy.key                  -> {:a=>1, :b=>2}
 
     def dup
       copy = RedBlackNode.new(key.dup, color)
@@ -104,7 +241,7 @@ module Tree
       copy
     end
 
-    def insert_key(value)
+    def insert_key(value) # :nodoc:
       if key.nil?
         @key = value
         self
@@ -127,7 +264,7 @@ module Tree
       end
     end
 
-    def insert_unique_key(value)
+    def insert_unique_key(value) # :nodoc:
       if key.nil?
         @key = value
         self
@@ -152,7 +289,7 @@ module Tree
       end
     end
 
-    def color_insert
+    def color_insert # :nodoc:
       if parent.nil?
         @color = :BLACK
       elsif parent.color == :BLACK
@@ -181,7 +318,7 @@ module Tree
       end
     end
 
-    def substitute_with_child
+    def substitute_with_child # :nodoc:
       if (child = right.nil? ? left : right)
         child.parent = parent
         child.color = :BLACK if color == :BLACK
@@ -207,7 +344,7 @@ module Tree
       end
     end
 
-    def color_delete_right
+    def color_delete_right # :nodoc:
       child_sibling = left
 
       if child_sibling.color == :RED
@@ -251,7 +388,7 @@ module Tree
       end
     end
 
-    def color_delete_left
+    def color_delete_left # :nodoc:
       child_sibling = right
 
       if child_sibling.color == :RED
@@ -295,7 +432,7 @@ module Tree
       end
     end
 
-    def rotate_right
+    def rotate_right # :nodoc:
       return self if left.nil?
 
       root = left
@@ -312,7 +449,7 @@ module Tree
       root
     end
 
-    def rotate_left
+    def rotate_left # :nodoc:
       return self if right.nil?
 
       root = right
