@@ -41,7 +41,7 @@ rake rdoc
 
 ## API
 
-### new(allow_duplicates = true) --> red_black_tree
+### new(allow_duplicates = true) &#8594; red_black_tree
 
 Returns a new, empty Red-Black tree. If option `allow_duplicates` is
 `false`, then only unique values are inserted in a Red-Black tree.
@@ -60,7 +60,7 @@ p rbt.size              #=> 0
 p rbt.allow_duplicates? #=> true
 ```
 
-### insert(value, ...) --> red_black_tree
+### insert(value, ...) &#8594; red_black_tree
 
 Inserts a value or sequence of values in a Red-Black tree and
 increments the `size` attribute by the number of values inserted.
@@ -89,7 +89,7 @@ rbt.select { |node| node.key % 2 == 0 }.map(&:key)
                         #=> [2, 4, ..., 10]
 ```
 
-### delete(value, ...) --> red_black_tree
+### delete(value, ...) &#8594; red_black_tree
 
 Deletes a value or sequence of values from a Red-Black tree.
 
@@ -105,7 +105,70 @@ rbt.delete(*4..8)       # #<Tree::RedBlack:0x00...>
 p rbt.size              #=> 5
 rbt.map(&:key)          #=> [1, 2, 3, 9, 10]
 ```
-### pre_order --> node_enumerator
+
+### search(value) &#8594; red_black_node
+
+Returns a Red-Black tree node whose `key` matches `value` by binary
+search. If no match is found, calls non-nil `ifnone`, otherwise
+returns `nil`.
+
+Example:
+
+```ruby
+require 'tree/red_black'
+
+shuffled_values = [*1..10].shuffle
+rbt = shuffled_values.reduce(Tree::RedBlack.new) do |acc, v|
+  acc.insert(v)
+end
+rbt.search(7)          #=> <Tree::RedBlackNode:0x00..., @key=7, ...>
+```
+
+### bsearch { |node| block } &#8594; red_black_node
+
+Returns a Red-Black tree node satisfying a criterion defined in
+`block` by binary search.
+
+If `block` evaluates to `true` or `false`, returns the first node
+for which the `block` evaluates to `true`. In this case, the
+criterion is expected to return `false` for nodes preceding
+the matching node and `true` for subsequent nodes.
+
+Example:
+
+```ruby
+require 'tree/red_black'
+
+shuffled_values = [*1..10].shuffle
+rbt = shuffled_values.reduce(Tree::RedBlack.new) do |acc, v|
+  acc.insert(v)
+end
+rbt.bsearch { |node| node.key >= 7 }
+                        #=> <Tree::RedBlackNode:0x00..., @key=7, ...>
+```
+
+If `block` evaluates to `<0`, `0` or `>0`, returns
+first node for which `block` evaluates to `0`. Otherwise returns
+`nil`. In this case, the criterion is expected to return
+`<0` for nodes preceding the matching node, `0` for some
+subsequent nodes and `>0` for nodes beyond that.
+
+Example:
+
+```ruby
+require 'tree/red_black'
+
+shuffled_values = [*1..10].shuffle
+rbt = shuffled_values.reduce(Tree::RedBlack.new) do |acc, v|
+  acc.insert(v)
+end
+rbt.bsearch { |node| 7 <=> node.key }
+                        #=> <Tree::RedBlackNode:0x00..., @key=7, ...>
+```
+
+If `block` is not given, returns an enumerator.
+
+### pre_order &#8594; node_enumerator
 
 Returns an enumerator for nodes in a Red-Black tree by pre-order
 traversal.
@@ -121,7 +184,7 @@ rbt.insert(*shuffled_values)        #=> #<Tree::RedBlack:0x00...>
 rbt.pre_order.map(&:key)            #=> [7, 5, 2, 1, 4, 3, 6, 9, 8, 10]
 ```
 
-### in_order --> node_enumerator
+### in_order &#8594; node_enumerator
 
 Returns an enumerator for nodes in a Red-Black tree by in-order
 traversal. The `each` method is aliased to `in_order`.
@@ -137,7 +200,7 @@ rbt.insert(*shuffled_values)
 rbt.in_order.map(&:key)  #=> [1, 2, ... 9, 10]
 ```
 
-### dup --> red_black_tree
+### dup &#8594; red_black_tree
 
 Returns a deep copy of a Red-Black tree, provided that the `dup`
 method for values in the tree is also a deep copy.

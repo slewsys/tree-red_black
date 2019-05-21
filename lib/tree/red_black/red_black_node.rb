@@ -38,11 +38,11 @@ module Tree
     #     require 'tree/red_black'
     #
     #     root = Tree::RedBlackNode.new(10)
-    #     p root.key              -> 10
-    #     p root.color            -> :RED
-    #     p root.parent           -> nil
-    #     p root.left             -> nil
-    #     p root.right            -> nil
+    #     p root.key              #=> 10
+    #     p root.color            #=> :RED
+    #     p root.parent           #=> nil
+    #     p root.left             #=> nil
+    #     p root.right            #=> nil
 
     def initialize(value = nil, color = :RED)
       raise "color must be :RED or :BLACK" unless [:RED, :BLACK].include?(color)
@@ -94,17 +94,17 @@ module Tree
     #     require 'tree/red_black'
     #
     #     root = Tree::RedBlackNode.new
-    #     p root.key                      -> nil
+    #     p root.key                      #=> nil
     #     root = root.insert_red_black(0)
-    #     p root.key                      -> 0
+    #     p root.key                      #=> 0
     #     root = root.insert_red_black(1)
-    #     p root.key                      -> 0
-    #     p root.left                     -> nil
-    #     p root.right.key                -> 1
+    #     p root.key                      #=> 0
+    #     p root.left                     #=> nil
+    #     p root.right.key                #=> 1
     #     root = root.insert_red_black(2)
-    #     p root.key                      -> 1
-    #     p root.left.key                 -> 0
-    #     p root.right.key                -> 2
+    #     p root.key                      #=> 1
+    #     p root.left.key                 #=> 0
+    #     p root.right.key                #=> 2
 
     def insert_red_black(value, allow_duplicates = true)
       node = allow_duplicates ? insert_key(value) : insert_unique_key(value)
@@ -137,7 +137,7 @@ module Tree
     #     root = [*4..8].reduce(root) do |acc, v|
     #       acc.delete_red_black(v)
     #     end
-    #     root.map(&:key)                 -> [1, 2, 3, 9, 10]
+    #     root.map(&:key)                 #=> [1, 2, 3, 9, 10]
 
     def delete_red_black(value)
       if key.nil?
@@ -154,6 +154,94 @@ module Tree
         else
           substitute_with_child
         end
+      end
+    end
+
+    ##
+    # Returns a node whose +key+ matches +value+ by binary search. If no
+    # match is found, calls non-nil +ifnone+, otherwise returns +nil+.
+    #
+    # === Example
+    #     require 'tree/red_black'
+    #
+    #     shuffled_values = [*1..10].shuffle
+    #     root = shuffled_values.reduce(Tree::RedBlackNode.new) do |acc, v|
+    #       acc.insert_red_black(v)
+    #     end
+    #     root.search(7)        #=> <Tree::RedBlackNode:0x00..., @key=7, ...>
+
+    def search(value, ifnone = nil)
+      if key.nil?
+        ifnone && ifnone.call
+      elsif value > key
+        right ? right.search(value, ifnone) : ifnone && ifnone.call
+      elsif value < key
+        left ? left.search(value, ifnone) : ifnone && ifnone.call
+      else
+        self
+      end
+    end
+
+    ##
+    # Returns a node satisfying a criterion defined in +block+ by
+    # binary search.
+    #
+    # If +block+ evaluates to +true+ or +false+, returns the first node
+    # for which the +block+ evaluates to +true+. In this case, the
+    # criterion is expected to return +false+ for nodes preceding
+    # the matching node and +true+ for subsequent nodes.
+    #
+    # === Example
+    #     require 'tree/red_black'
+    #
+    #     shuffled_values = [*1..10].shuffle
+    #     root = shuffled_values.reduce(Tree::RedBlackNode.new) do |acc, v|
+    #       acc.insert_red_black(v)
+    #     end
+    #     root.bsearch { |node| node.key >= 7 }
+    #                           #=> <Tree::RedBlackNode:0x00... @key=7 ...>
+    #
+    # If +block+ evaluates to <tt><0</tt>, +0+ or <tt>>0</tt>, returns
+    # first node for which +block+ evaluates to +0+. Otherwise returns
+    # +nil+. In this case, the criterion is expected to return
+    # <tt><0</tt> for nodes preceding the matching node, +0+ for some
+    # subsequent nodes and <tt>>0</tt> for nodes beyond that.
+    #
+    # === Example
+    #     require 'tree/red_black'
+    #
+    #     shuffled_values = [*1..10].shuffle
+    #     root = shuffled_values.reduce(Tree::RedBlackNode.new) do |acc, v|
+    #       acc.insert_red_black(v)
+    #     end
+    #     root.bsearch { |node| 7 <=> node.key }
+    #                           #=> <Tree::RedBlackNode:0x00... @key=7 ...>
+    #
+    # If +block++ is not given, returns an enumerator.
+
+    def bsearch(&block)
+      return enum_for(:bsearch) unless block_given?
+
+      return nil if key.nil?
+
+      result = block.call(self)
+      case result
+      when Integer
+        if result > 0
+          right ? right.bsearch(&block) : nil
+        elsif result < 0
+          left ? left.bsearch(&block) : nil
+        else
+          self
+        end
+      when TrueClass, FalseClass
+        if result
+          left ? (node = left.bsearch(&block); node ? node : self) : self
+        else
+          right ? right.bsearch(&block) : nil
+        end
+      else
+        nil
       end
     end
 
@@ -183,7 +271,7 @@ module Tree
     #     root = [*1..10].reduce(Tree::RedBlackNode.new) do |acc, v|
     #       acc.insert_red_black(v)
     #     end
-    #     root.pre_order.map(&:key)        -> [4, 2, 1, 3, 6, 5, 8, 7, 9, 10]
+    #     root.pre_order.map(&:key)        #=> [4, 2, 1, 3, 6, 5, 8, 7, 9, 10]
 
     def pre_order(&block)
       return enum_for(:pre_order) unless block_given?
@@ -204,7 +292,7 @@ module Tree
     #     root = shuffled_values.reduce(Tree::RedBlackNode.new) do |acc, v|
     #       acc.insert_red_black(v)
     #     end
-    #     root.pre_order.map(&:key)        -> [1, 2, ..., 10]
+    #     root.pre_order.map(&:key)        #=> [1, 2, ..., 10]
 
     def in_order(&block)
       return enum_for(:in_order) unless block_given?
@@ -214,6 +302,7 @@ module Tree
       right.in_order(&block) if right
     end
 
+    ##
     # Returns a deep copy of a Red-Black tree, provided that the
     # +dup+ method for values in the tree is also a deep copy.
     #
@@ -223,10 +312,10 @@ module Tree
     #
     #     root = Tree::RedBlackNode.new({a: 1, b: 2})
     #     root_copy = root.dup
-    #     p root.key                       -> {:a=>1, :b=>2}
-    #     p root.key.delete(:a)            -> 1
-    #     p root.key                       -> {:b=>2}
-    #     p root_copy.key                  -> {:a=>1, :b=>2}
+    #     p root.key                       #=> {:a=>1, :b=>2}
+    #     p root.key.delete(:a)            #=> 1
+    #     p root.key                       #=> {:b=>2}
+    #     p root_copy.key                  #=> {:a=>1, :b=>2}
 
     def dup
       copy = RedBlackNode.new(key.dup, color)

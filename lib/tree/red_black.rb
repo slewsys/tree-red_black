@@ -35,9 +35,9 @@ module Tree
     #     require 'tree/red_black'
     #
     #     rbt = Tree::RedBlack.new
-    #     p rbt.root              -> nil
-    #     p rbt.size              -> 0
-    #     p rbt.allow_duplicates? -> true
+    #     p rbt.root              #=> nil
+    #     p rbt.size              #=> 0
+    #     p rbt.allow_duplicates? #=> true
 
     def initialize(allow_duplicates = true)
       @root = nil
@@ -71,11 +71,11 @@ module Tree
     #     require 'tree/red_black'
     #
     #     rbt = Tree::RedBlack.new
-    #     rbt.insert(*1..10)      -> #<Tree::RedBlack:0x00...>
-    #     p rbt.size              -> 10
-    #     rbt.map(&:key)          -> [1, 2, ..., 10]
+    #     rbt.insert(*1..10)      #=> #<Tree::RedBlack:0x00...>
+    #     p rbt.size              #=> 10
+    #     rbt.map(&:key)          #=> [1, 2, ..., 10]
     #     rbt.select { |node| node.key % 2 == 0 }.map(&:key)
-    #                             -> [2, 4, ..., 10]
+    #                             #=> [2, 4, ..., 10]
 
     def insert(*values)
       values.each do |value; new_root|
@@ -97,11 +97,11 @@ module Tree
     #     require 'tree/red_black'
     #
     #     rbt = Tree::RedBlack.new
-    #     rbt.insert(*1..10)      -> #<Tree::RedBlack:0x00...>
-    #     p rbt.size              -> 10
-    #     rbt.delete(*4..8)       -> #<Tree::RedBlack:0x00...>
-    #     p rbt.size              -> 5
-    #     rbt.map(&:key)          -> [1, 2, 3, 9, 10]
+    #     rbt.insert(*1..10)      #=> #<Tree::RedBlack:0x00...>
+    #     p rbt.size              #=> 10
+    #     rbt.delete(*4..8)       #=> #<Tree::RedBlack:0x00...>
+    #     p rbt.size              #=> 5
+    #     rbt.map(&:key)          #=> [1, 2, 3, 9, 10]
 
     def delete(*values)
       values.each do |value; new_root|
@@ -116,6 +116,67 @@ module Tree
     end
 
     ##
+    # Returns a Red-Black tree node whose +key+ matches +value+ by
+    # binary search. If no match is found, calls non-nil +ifnone+,
+    # otherwise returns +nil+.
+    #
+    # === Example
+    #     require 'tree/red_black'
+    #
+    #     shuffled_values = [*1..10].shuffle
+    #     rbt = shuffled_values.reduce(Tree::RedBlack.new) do |acc, v|
+    #       acc.insert(v)
+    #     end
+    #     rbt.search(7)        #=> <Tree::RedBlackNode:0x00..., @key=7, ...>
+
+    def search(value, ifnone = nil)
+      root ? root.search(value, ifnone) : nil
+    end
+
+    ##
+    # Returns a Red-Black tree node satisfying a criterion defined in
+    # +block+ by binary search.
+    #
+    # If +block+ evaluates to +true+ or +false+, returns the first node
+    # for which the +block+ evaluates to +true+. In this case, the
+    # criterion is expected to return +false+ for nodes preceding
+    # the matching node and +true+ for subsequent nodes.
+    #
+    # === Example
+    #     require 'tree/red_black'
+    #
+    #     shuffled_values = [*1..10].shuffle
+    #     rbt = shuffled_values.reduce(Tree::RedBlack.new) do |acc, v|
+    #       acc.insert(v)
+    #     end
+    #     rbt.bsearch { |node| node.key >= 7 }
+    #                           #=> <Tree::RedBlackNode:0x00... @key=7 ...>
+    #
+    # If +block+ evaluates to <tt><0</tt>, +0+ or <tt>>0</tt>, returns
+    # first node for which +block+ evaluates to +0+. Otherwise returns
+    # +nil+. In this case, the criterion is expected to return
+    # <tt><0</tt> for nodes preceding the matching node, +0+ for some
+    # subsequent nodes and <tt>>0</tt> for nodes beyond that.
+    #
+    # === Example
+    #     require 'tree/red_black'
+    #
+    #     shuffled_values = [*1..10].shuffle
+    #     rbt = shuffled_values.reduce(Tree::RedBlack.new) do |acc, v|
+    #       acc.insert(v)
+    #     end
+    #     rbt.bsearch { |node| 7 <=> node.key }
+    #                           #=> <Tree::RedBlackNode:0x00... @key=7 ...>
+    #
+    # If +block++ is not given, returns an enumerator.
+
+    def bsearch(&block)
+      return enum_for(:bsearch) unless block_given?
+
+      root ? root.bsearch(&block) : nil
+    end
+
+    ##
     # Returns an enumerator for nodes in a Red-Black tree by pre-order
     # traversal.
     #
@@ -123,8 +184,8 @@ module Tree
     #     require 'tree/red_black'
     #
     #     rbt = Tree::RedBlack.new
-    #     rbt.insert(*1..10)              -> #<Tree::RedBlack:0x00...>
-    #     rbt.pre_order.map(&:key)        -> [4, 2, 1, 3, 6, 5, 8, 7, 9, 10]
+    #     rbt.insert(*1..10)              #=> #<Tree::RedBlack:0x00...>
+    #     rbt.pre_order.map(&:key)        #=> [4, 2, 1, 3, 6, 5, 8, 7, 9, 10]
 
     def pre_order(&block)
       return enum_for(:pre_order) unless block_given?
@@ -143,7 +204,7 @@ module Tree
     #     rbt = Tree::RedBlack.new
     #     shuffled_values = [*1..10].shuffle
     #     rbt.insert(*shuffled_values)
-    #     rbt.in_order.map(&:key)        -> [1, 2, ..., 10]
+    #     rbt.in_order.map(&:key)        #=> [1, 2, ..., 10]
 
     def in_order(&block)
       return enum_for(:in_order) unless block_given?
@@ -163,10 +224,10 @@ module Tree
     #     rbt = Tree::RedBlack.new
     #     rbt.insert({a: 1, b: 2})
     #     rbt_copy = rbt.dup
-    #     p rbt.root.key            -> {:a=>1, :b=>2}
-    #     p rbt.root.key.delete(:a) -> 1
-    #     p rbt.root.key            -> {:b=>2}
-    #     p rbt_copy.root.key       -> {:a=>1, :b=>2}
+    #     p rbt.root.key            #=> {:a=>1, :b=>2}
+    #     p rbt.root.key.delete(:a) #=> 1
+    #     p rbt.root.key            #=> {:b=>2}
+    #     p rbt_copy.root.key       #=> {:a=>1, :b=>2}
 
     def dup
       copy = RedBlack.new

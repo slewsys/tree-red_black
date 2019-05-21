@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    tree-red_black (0.2.0)
+    tree-red_black (0.3.0)
 
 GEM
   remote: https://rubygems.org/

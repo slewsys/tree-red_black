@@ -289,8 +289,47 @@ RSpec.describe Tree::RedBlack do
     end
   end
 
+  context '#search' do
+    it 'returns a node whose key matches a given value' do
+      max = rand(100..200)
+      rbt = [*0..max].shuffle.reduce(Tree::RedBlack.new) do |acc, v|
+        acc.insert(v)
+      end
+
+      (max + 1).times do |i|
+        expect(rbt.search(i).key).to eq(i)
+      end
+    end
+  end
+
+  context '#bsearch' do
+    it 'returns a node satisfying a binary criterion in a block' do
+      max = rand(100..200)
+      rbt = [*0..max].shuffle.reduce(Tree::RedBlack.new) do |acc, v|
+        acc.insert(v)
+      end
+
+      (max + 1).times do |i; rbnode|
+        rbnode = rbt.bsearch { |node| node.key >= i }
+        expect(rbnode.key).to eq(i)
+      end
+    end
+
+    it 'returns a node satisfying a ternary criterion in a block' do
+      max = rand(100..200)
+      rbt = [*0..max].shuffle.reduce(Tree::RedBlack.new) do |acc, v|
+        acc.insert(v)
+      end
+
+      (max + 1).times do |i; rbnode|
+        rbnode = rbt.bsearch { |node| i <=> node.key }
+        expect(rbnode.key).to eq(i)
+      end
+    end
+  end
+
   context '#dup' do
-    it 'duplicates and existing tree' do
+    it 'duplicates an existing tree' do
       rbt = Tree::RedBlack.new(false)
       rbt.insert(1)
       rbt.insert(2)
