@@ -106,7 +106,7 @@ p rbt.size              #=> 5
 rbt.map(&:key)          #=> [1, 2, 3, 9, 10]
 ```
 
-### search(value) &#8594; red_black_node
+### search(value, ifnone = nil) &#8594; red_black_node
 
 Returns a Red-Black tree node whose `key` matches `value` by binary
 search. If no match is found, calls non-nil `ifnone`, otherwise
