@@ -148,7 +148,7 @@ module Tree
         left ? left.delete_red_black(value) : nil
       else
         if left && right
-          node = right.minimum
+          node = right.min
           @key = node.key
           node.substitute_with_child
         else
@@ -245,7 +245,21 @@ module Tree
       end
     end
 
-    def minimum # :nodoc:
+    ##
+    # Returns the node below +self+ whose +key+ is a minimum.
+    #
+    # === Example
+    #     require 'tree/red_black'
+    #
+    #     root = [*0..10].reduce(Tree::RedBlackNode.new) do |acc, v|
+    #       acc.insert_red_black(v)
+    #     end
+    #     root                  #=> <Tree::RedBlackNode:0x00..., @key=4, ...>
+    #     root.min              #=> <Tree::RedBlackNode:0x00..., @key=0, ...>
+    #     root.right            #=> <Tree::RedBlackNode:0x00..., @key=6, ...>
+    #     root.right.min        #=> <Tree::RedBlackNode:0x00..., @key=5, ...>
+
+    def min
       node = self
       while node.left
         node = node.left
@@ -253,10 +267,72 @@ module Tree
       node
     end
 
-    def maximum # :nodoc:
+    ##
+    # Returns the node below +self+ whose +key+ is a maximum.
+    #
+    # === Example
+    #     require 'tree/red_black'
+    #
+    #     root = [*0..10].reduce(Tree::RedBlackNode.new) do |acc, v|
+    #       acc.insert_red_black(v)
+    #     end
+    #     root                  #=> <Tree::RedBlackNode:0x00..., @key=4, ...>
+    #     root.max              #=> <Tree::RedBlackNode:0x00..., @key=10, ...>
+    #     root.left             #=> <Tree::RedBlackNode:0x00..., @key=2, ...>
+    #     root.left.max         #=> <Tree::RedBlackNode:0x00..., @key=3, ...>
+
+    def max
       node = self
       while node.right
         node = node.right
+      end
+      node
+    end
+
+    ##
+    # Returns the node preceding +self+, or +nil+ if no predecessor
+    # exists. If duplicate keys are allowed, it's possible that
+    # <tt>pred.key == key</tt>.
+    #
+    # === Example
+    #     require 'tree/red_black'
+    #
+    #     root = [*1..10].reduce(Tree::RedBlackNode.new) do |acc, v|
+    #       acc.insert_red_black(v)
+    #     end
+    #     root.right.right.key            #=> 8
+    #     root.right.right.pred.key       #=> 7
+
+    def pred
+      return left.max if left
+
+      node = parent
+      while node && node.key > key
+        node = node.parent
+      end
+      node
+    end
+
+    ##
+    # Returns the node succeeding +self+, or +nil+ if no successor
+    # exists. If duplicate keys are allowed, it's possible that
+    # <tt>succ.key == key</tt>.
+    #
+    # === Example
+    #     require 'tree/red_black'
+    #
+    #     root = [*1..10].reduce(Tree::RedBlackNode.new) do |acc, v|
+    #       acc.insert_red_black(v)
+    #     end
+    #     root.right.right.key            #=> 8
+    #     root.right.right.succ.key       #=> 9
+
+    def succ
+      return right.min if right
+
+      node = parent
+      while node && node.key < key
+        node = node.parent
       end
       node
     end

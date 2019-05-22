@@ -333,6 +333,36 @@ RSpec.describe Tree::RedBlackNode do
     end
   end
 
+  context '#pred' do
+    it 'returns a node whose key is the predecessor of a given node' do
+      max = rand(100..200)
+      rbn = [*0..max].shuffle.reduce(Tree::RedBlackNode.new) do |acc, v|
+        acc.insert_red_black(v)
+      end
+
+      rbn.each do |node|
+        expect(node.key).to eq(node.pred.key + 1) if node.key > 0
+      end
+
+      expect(rbn.min.pred).to eq(nil)
+    end
+  end
+
+  context '#succ' do
+    it 'returns a node whose key is the successor of a given node' do
+      max = rand(100..200)
+      rbn = [*0..max].shuffle.reduce(Tree::RedBlackNode.new) do |acc, v|
+        acc.insert_red_black(v)
+      end
+
+      rbn.each do |node|
+        expect(node.key).to eq(node.succ.key - 1) if node.key < max
+      end
+
+      expect(rbn.max.succ).to eq(nil)
+    end
+  end
+
   context '#dup' do
     it 'duplicates an existing tree (node)' do
       rbn = Tree::RedBlackNode.new
