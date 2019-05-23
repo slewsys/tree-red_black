@@ -66,7 +66,7 @@ minimum or maximum in the sub-tree). This is provided as the node
 methods `min` and `max`.
 
 While a Red-Black tree can be constructed from nodes alone, the
-[Tree::RedBlack API](https://github.com/slewsys/tree-red_black?#Tree::RedBlack%20API),
+[Tree::RedBlack API](https://github.com/slewsys/tree-red_black?#treeredblack-api)
 provides a cleaner way of working with Red-Black trees. Start
 there if only using the Red-Black tree as a container.
 
