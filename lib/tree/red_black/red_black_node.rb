@@ -13,10 +13,10 @@ module Tree
   # referenced above. In particular, leaf nodes are +nil+, which
   # affects the details of node deletion.
   #
-  # While it's possible to use class Tree::RedBlackNode independently
-  # of Tree::RedBlack, it's strongly recommended that Tree::RedBlack
-  # be used instead.
-
+  # While a Red-Black tree can be constructed from nodes alone, the
+  # Tree::RedBlack API provides a cleaner way of working with
+  # Red-Black trees. Start there if only using the Red-Black tree as a
+  # container.
 
   class RedBlackNode
     include Enumerable
@@ -24,14 +24,20 @@ module Tree
     attr_accessor :left, :right, :key, :parent, :color
 
     ##
-    # Returns a new Red-Black tree node with +key+ parameter set to
-    # option +value+, if given, otherwise +nil+. Option +color+, if
-    # specified, must be either <tt>:RED</tt> or <tt>:BLACK</tt>.
+    # Returns a new node with +key+ parameter set to option +value+.
+    # The +color+ option, if given, must be be either <tt>:RED</tt> or
+    # <tt>:BLACK</tt>.
     #
-    # In addition to the +key+ parameter, a Red-Black tree node exposes
-    # parameters +color+, the node's color, +parent+, the node's
-    # parent, and +left+ and +right+, the node's left and right
-    # children, respectively.
+    # A Red-Black tree is a collection of nodes arranged as a binary tree.
+    # In addition to the binary node attributes `left` and `right`, which
+    # reference the left and right sub-trees of a given node, and the
+    # attribute `key` which stores a node's data, a Red-Black tree node
+    # also has attributes `color` and `parent`.
+    #
+    # The `color` attribute is used internally to balance the tree after a
+    # node is inserted or deleted. The `parent` attribute references a
+    # node's parent, or `nil` in the case of the root node of a tree.
+
     #
     # === Example
     #
@@ -69,25 +75,24 @@ module Tree
     end
 
     ##
-    # Inserts the given value in a Red-Black tree whose root node is
-    # self. If the +key+ parameter of the root node is nil, then value
-    # is assigned to +key+. Otherwise, value is stored in new
-    # Tree::RedBlackNode which is then inserted in the tree; the tree
-    # is then re-balanced as needed, and the root of the balanced tree
-    # returned.
+    # Inserts the given +value+ in a tree whose root node is +self+.
+    # If the +key+ attribute of the root node is +nil+, then +value+
+    # is assigned to +key+. Otherwise, +value+ is used to instantiate
+    # a Tree::RedBlackNode, and the node is inserted in the tree; the
+    # tree is then re-balanced as needed, and the root of the balanced
+    # tree returned.
 
     # Since a Red-Black tree maintains an ordered, Enumerable
-    # collection, every value inserted must be comparable with every
+    # collection, every value inserted must be Comparable with every
     # other value. Methods +each+, +map+, +select+, +find+, +sort+,
     # etc., can be applied to a Red-Black tree's root node to iterate
     # over all nodes in the tree.
     #
-    # The individual nodes yielded by enumeration respond to method
-    # +key+ to retrieve the value stored in that node. Method +each+,
-    # in particular, is aliased to +in_order+, so that nodes are
-    # sorted in ascending order by +key+ value. Nodes can also be
-    # traversed by method +pre_order+, e.g., to generate paths in the
-    # tree.
+    # Each node yielded by enumeration has a +key+ attribute to
+    # retrieve the value stored in that node. Method +each+, in
+    # particular, is aliased to +in_order+, so that nodes are sorted
+    # in ascending order by +key+ value. Nodes can also be traversed
+    # by method +pre_order+, e.g., to generate paths in the tree.
     #
     # === Example
     #
@@ -120,12 +125,13 @@ module Tree
     end
 
     ##
-    # Deletes the given value from a Red-Black tree whose root node is
-    # self. If the tree has only one node and its +key+ parameter
-    # matches value, then that node's +key+ parameter is set to nil.
-    # Otherwise, the first node found whose +key+ matches value is
-    # removed from the tree, and the tree is re-balanced. The root of
-    # the balanced tree is returned.
+    # Deletes the given +value+ from a tree whose root node is +self+.
+    # If the tree has only one remaining node and its +key+ attribute
+    # matches +value+, then the remaining node's +key+ attribute is
+    # set to +nil+ but the node itself is not removed. Otherwise, the
+    # first node found whose +key+ matches +value+ is removed from the
+    # tree, and the tree is re-balanced. The root of the balanced tree
+    # is returned.
     #
     # === Example
     #
@@ -246,7 +252,8 @@ module Tree
     end
 
     ##
-    # Returns the node below +self+ whose +key+ is a minimum.
+    # Returns the node whose +key+ is a minimum in the sub-tree with
+    # root +self+.
     #
     # === Example
     #     require 'tree/red_black'
@@ -268,7 +275,8 @@ module Tree
     end
 
     ##
-    # Returns the node below +self+ whose +key+ is a maximum.
+    # Returns the node whose +key+ is a maximum in the sub-tree with
+    # root +self+.
     #
     # === Example
     #     require 'tree/red_black'
@@ -338,8 +346,8 @@ module Tree
     end
 
     ##
-    # Returns an enumerator for nodes in a Red-Black tree by pre-order
-    # traversal.
+    # Returns an enumerator for nodes in the tree with root +self+ by
+    # pre-order traversal.
     #
     # === Example
     #     require 'tree/red_black'
@@ -347,7 +355,7 @@ module Tree
     #     root = [*1..10].reduce(Tree::RedBlackNode.new) do |acc, v|
     #       acc.insert_red_black(v)
     #     end
-    #     root.pre_order.map(&:key)        #=> [4, 2, 1, 3, 6, 5, 8, 7, 9, 10]
+    #     root.pre_order.map(&:key)       #=> [4, 2, 1, 3, 6, 5, 8, 7, 9, 10]
 
     def pre_order(&block)
       return enum_for(:pre_order) unless block_given?
@@ -358,8 +366,8 @@ module Tree
     end
 
     ##
-    # Returns an enumerator for nodes in a Red-Black tree by in-order
-    # traversal. The +each+ method is aliased to +in_order+
+    # Returns an enumerator for nodes in the tree with root +self+ by
+    # in-order traversal.
     #
     # === Example
     #     require 'tree/red_black'
@@ -368,7 +376,7 @@ module Tree
     #     root = shuffled_values.reduce(Tree::RedBlackNode.new) do |acc, v|
     #       acc.insert_red_black(v)
     #     end
-    #     root.pre_order.map(&:key)        #=> [1, 2, ..., 10]
+    #     root.in_order.map(&:key)        #=> [1, 2, ..., 10]
 
     def in_order(&block)
       return enum_for(:in_order) unless block_given?
@@ -379,8 +387,9 @@ module Tree
     end
 
     ##
-    # Returns a deep copy of a Red-Black tree, provided that the
-    # +dup+ method for values in the tree is also a deep copy.
+    # Returns a deep copy of the tree with root +self+, provided that
+    # the +dup+ method for the +key+ attribute of a node is also a
+    # deep copy.
     #
     # === Example
     #

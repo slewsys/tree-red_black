@@ -27,8 +27,9 @@ module Tree
     # Returns a new, empty Red-Black tree. If option +allow_duplicates+ is
     # +false+, then only unique values are inserted in a Red-Black tree.
     #
-    # A Red-Black tree exposes parameters +root+, the root node of a
-    # tree, and +size+, the number of nodes in the tree.
+    # The +root+ attribute references the root node of the tree.
+    # The +size+ attribute indicates the number of nodes in the tree.
+    # When +size+ is +0+, +root+ is always +nil+.
     #
     # === Example
     #
