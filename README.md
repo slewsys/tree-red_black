@@ -2,15 +2,44 @@
 
 # Tree::RedBlack
 
+- [Description](#description)
+- [Installation](#installation)
+- [Tree::RedBlack API](#treeredblack-api)
+    - [new(allow_duplicates = true) &#8594; red_black_tree](#newallow_duplicates--true--red_black_tree)
+    - [insert(value, ...) &#8594; red_black_tree](#insertvalue---red_black_tree)
+    - [delete(value, ...) &#8594; red_black_tree](#deletevalue---red_black_tree)
+    - [search(value, ifnone = nil) &#8594; red_black_node](#searchvalue-ifnone--nil--red_black_node)
+    - [bsearch { |node| block } &#8594; red_black_node](#bsearch--node-block---red_black_node)
+    - [pre_order &#8594; node_enumerator](#pre_order--node_enumerator)
+    - [in_order &#8594; node_enumerator](#in_order--node_enumerator)
+    - [dup &#8594; red_black_tree](#dup--red_black_tree)
+- [Tree::RedBlackNode API](#treeredblacknode-api)
+    - [new(value = nil, color = :RED) &#8594; red_black_node](#newvalue--nil-color--red--red_black_node)
+    - [insert_red_black(value, allow_duplicates = true) &#8594; red_black_node](#insert_red_blackvalue-allow_duplicates--true--red_black_node)
+    - [delete_red_black(value) &#8594; red_black_node](#delete_red_blackvalue--red_black_node)
+    - [search(value, ifnone = nil) &#8594; red_black_node](#searchvalue-ifnone--nil--red_black_node-1)
+    - [bsearch(&block) &#8594; red_black_node](#bsearchblock--red_black_node)
+    - [min() &#8594; red_black_node](#min--red_black_node)
+    - [max() &#8594; red_black_node](#max--red_black_node)
+    - [pred() &#8594; red_black_node](#pred--red_black_node)
+    - [succ() &#8594; red_black_node](#succ--red_black_node)
+    - [pre_order(&block) &#8594; red_black_node](#pre_orderblock--red_black_node)
+    - [in_order(&block) &#8594; red_black_node](#in_orderblock--red_black_node)
+    - [dup() &#8594; red_black_node](#dup--red_black_node)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Description
+
 The __Tree::RedBlack__ library is a pure-Ruby implementation of
 a [Red-Black tree](https://en.wikipedia.org/wiki/Red–black_tree) --
-i.e., a self-balancing binary search tree
+i.e., a self-balancing binary tree
 with [O(log n)](https://en.wikipedia.org/wiki/Big-O_notation) search,
-insert and delete operations. It is appropriate for maintaining an
-ordered collection where insertion and deletion are desired at
+insert and delete operations. It is appropriate for maintaining a
+sorted collection where insertion and deletion are desired at
 arbitrary positions.
 
-The implementation differs slightly from the Wikipedia description
+This implementation differs slightly from the Wikipedia description
 referenced above. In particular, leaf nodes are `nil`, which affects the
 details of node deletion.
 
@@ -22,9 +51,10 @@ from a Unix shell:
 ```bash
 git clone git@github.com:slewsys/tree-red_black.git
 cd tree-red_black
+sudo gem update --system
 bundle
 rake build
-gem install pkg/tree-red_black*.gem
+sudo gem install pkg/tree-red_black*.gem
 ```
 
 The RSpec test suite can be run with:
@@ -37,6 +67,206 @@ To build RDoc documentation, use:
 
 ```bash
 rake rdoc
+```
+
+## Tree::RedBlack API
+
+Once a Red-Black tree has been instantiated
+(see
+[new](#newallow_duplicates--true--red_black_tree)),
+any [Comparable](https://docs.ruby-lang.org/en/2.7.0/Comparable.html)
+value can be stored, provided that every value in the tree is
+comparable with every other. Values are stored in nodes and referenced
+by the `key` attribute of the node. Nodes are added to a Red-Black
+tree by inserting values
+(see
+[insert](#insertvalue---red_black_tree)),
+and nodes are removed by deleting values
+(see
+[delete](#deletevalue---red_black_tree)).
+
+A Red-Black tree's nodes can be enumerated in ascending order by value
+with the tree's [each](#in_order--node_enumerator) method. Additional
+enumeration methods are described
+in [Enumerable](https://ruby-doc.org/core-2.7.0/Enumerable.html).
+
+### new(allow_duplicates = true) &#8594; red_black_tree
+
+Returns a new, empty Red-Black tree. If option `allow_duplicates` is
+`false`, then only unique values are inserted in a Red-Black tree.
+
+The `root` attribute references the root node of the tree.
+The `size` attribute indicates the number of nodes in the tree.
+When `size` is `0`, `root` is always `nil`.
+
+Example:
+
+```ruby
+require 'tree/red_black'
+
+rbt = Tree::RedBlack.new
+p rbt.root                #=> nil
+p rbt.size                #=> 0
+p rbt.allow_duplicates?   #=> true
+```
+
+### insert(value, ...) &#8594; red_black_tree
+
+Inserts a value or sequence of values in a Red-Black tree and
+increments the `size` attribute by the number of values inserted.
+
+Since a Red-Black tree maintains a sorted, [Enumerable](https://ruby-doc.org/core-2.7.0/Enumerable.html) collection,
+every value inserted must be comparable with every other value.
+Methods `each`, `map`, `select`, `find`, `sort`, etc., can be applied
+directly to the tree.
+
+The individual nodes yielded by enumeration respond to method `key` to
+retrieve the value stored in that node. Method `each`, in particular,
+is aliased to `in_order`, so that nodes are sorted in ascending order
+by `key` value. Nodes can also be traversed by method `pre_order`,
+e.g., to generate paths in the tree.
+
+Example:
+
+```ruby
+require 'tree/red_black'
+
+rbt = Tree::RedBlack.new
+rbt.insert(*1..10)        # #<Tree::RedBlack:0x00...>
+p rbt.size                #=> 10
+rbt.map(&:key)            #=> [1, 2, ..., 10]
+rbt.select { |node| node.key % 2 == 0 }.map(&:key)
+                          #=> [2, 4, ..., 10]
+```
+
+### delete(value, ...) &#8594; red_black_tree
+
+Deletes a value or sequence of values from a Red-Black tree.
+
+Example:
+
+```ruby
+require 'tree/red_black'
+
+rbt = Tree::RedBlack.new
+rbt.insert(*1..10)        # #<Tree::RedBlack:0x00...>
+p rbt.size                #=> 10
+rbt.delete(*4..8)         # #<Tree::RedBlack:0x00...>
+p rbt.size                #=> 5
+rbt.map(&:key)            #=> [1, 2, 3, 9, 10]
+```
+
+### search(value, ifnone = nil) &#8594; red_black_node
+
+Returns a Red-Black tree node whose `key` matches `value` by binary
+search. If no match is found, calls non-nil `ifnone`, otherwise
+returns `nil`.
+
+Example:
+
+```ruby
+require 'tree/red_black'
+
+shuffled_values = [*1..10].shuffle
+rbt = shuffled_values.reduce(Tree::RedBlack.new) do |acc, v|
+  acc.insert(v)
+end
+rbt.search(7)             #=> <Tree::RedBlackNode:0x00..., @key=7, ...>
+```
+
+### bsearch { |node| block } &#8594; red_black_node
+
+Returns a Red-Black tree node satisfying a criterion defined in
+`block` by binary search.
+
+If `block` evaluates to `true` or `false`, returns the first node for
+which the `block` evaluates to `true`. In this case, the criterion is
+expected to return `false` for nodes preceding the matching node and
+`true` for subsequent nodes.
+
+Example:
+
+```ruby
+require 'tree/red_black'
+
+shuffled_values = [*1..10].shuffle
+rbt = shuffled_values.reduce(Tree::RedBlack.new) do |acc, v|
+  acc.insert(v)
+end
+rbt.bsearch { |node| node.key >= 7 }
+                          #=> <Tree::RedBlackNode:0x00..., @key=7, ...>
+```
+
+If `block` evaluates to `<0`, `0` or `>0`, returns first node for
+which `block` evaluates to `0`. Otherwise returns `nil`. In this case,
+the criterion is expected to return `<0` for nodes preceding the
+matching node, `0` for some subsequent nodes and `>0` for nodes beyond
+that.
+
+Example:
+
+```ruby
+require 'tree/red_black'
+
+shuffled_values = [*1..10].shuffle
+rbt = shuffled_values.reduce(Tree::RedBlack.new) do |acc, v|
+  acc.insert(v)
+end
+rbt.bsearch { |node| 7 <=> node.key }
+                          #=> <Tree::RedBlackNode:0x00..., @key=7, ...>
+```
+
+If `block` is not given, returns an enumerator.
+
+### pre_order &#8594; node_enumerator
+
+Returns an enumerator for nodes in a Red-Black tree by pre-order
+traversal.
+
+Example:
+
+```ruby
+require 'tree/red_black'
+
+rbt = Tree::RedBlack.new
+shuffled_values = [*1..10].shuffle  #=> [5, 9, 10, 8, 7, 6, 1, 2, 4, 3]
+rbt.insert(*shuffled_values)        #=> #<Tree::RedBlack:0x00...>
+rbt.pre_order.map(&:key)            #=> [7, 5, 2, 1, 4, 3, 6, 9, 8, 10]
+```
+
+### in_order &#8594; node_enumerator
+
+Returns an enumerator for nodes in a Red-Black tree by in-order
+traversal. The `each` method is aliased to `in_order`.
+
+Example:
+
+```ruby
+require 'tree/red_black'
+
+rbt = Tree::RedBlack.new
+shuffled_values = [*1..10].shuffle
+rbt.insert(*shuffled_values)
+rbt.in_order.map(&:key)             #=> [1, 2, ... 9, 10]
+```
+
+### dup &#8594; red_black_tree
+
+Returns a deep copy of a Red-Black tree, provided that the `dup`
+method for the `key` attribute of a tree node is also a deep copy.
+
+Example:
+
+```ruby
+require 'tree/red_black'
+
+rbt = Tree::RedBlack.new
+rbt.insert({a: 1, b: 2})
+rbt_copy = rbt.dup
+p rbt.root.key            #=> {:a=>1, :b=>2}
+p rbt.root.key.delete(:a) #=> 1
+p rbt.root.key            #=> {:b=>2}
+p rbt_copy.root.key       #=> {:a=>1, :b=>2}
 ```
 
 ### Tree::RedBlackNode API
@@ -53,20 +283,20 @@ node's parent node, or `nil` in the case of the root node of a tree.
 
 Not all implementations of Red-Black trees have nodes with `parent`
 attributes, but it's generally recognized as the most efficient way
-of maintaining (i.e., balancing and re-coloring) a Red-Black tree.
+of balancing and re-coloring a Red-Black tree.
 
-Since the data in a binary tree can be thought of as an ordered
+Since the data in a binary tree can be thought of as a sorted
 collection, it's convenient to be able to refer to a node's
 predecessor and successor (i.e., the node whose `key` is the
-predecessor or successor in the ordering. In general, this differs
-from parent or child node). This is provided as the node methods
-`pred` and `succ`. And for a given sub-tree, its convenient to be able
-to refer to its min and max nodes (i.e., the node whose `key` is a
-minimum or maximum in the sub-tree). This is provided as the node
+predecessor or successor in the sorted ascending order. In general,
+this differs from parent or child node). This is provided as the node
+methods `pred` and `succ`. And for a given sub-tree, its convenient to
+be able to refer to its min and max nodes (i.e., the node whose `key`
+is a minimum or maximum in the sub-tree). This is provided as the node
 methods `min` and `max`.
 
 While a Red-Black tree can be constructed from nodes alone, the
-[Tree::RedBlack API](https://github.com/slewsys/tree-red_black?#treeredblack-api)
+[Tree::RedBlack API](#treeredblack-api)
 provides a cleaner way of working with Red-Black trees. Start
 there if only using the Red-Black tree as a container.
 
@@ -329,187 +559,6 @@ p root.key                      #=> {:a=>1, :b=>2}
 p root.key.delete(:a)           #=> 1
 p root.key                      #=> {:b=>2}
 p root_copy.key                 #=> {:a=>1, :b=>2}
-```
-
-## Tree::RedBlack API
-
-### new(allow_duplicates = true) &#8594; red_black_tree
-
-Returns a new, empty Red-Black tree. If option `allow_duplicates` is
-`false`, then only unique values are inserted in a Red-Black tree.
-
-The `root` attribute references the root node of the tree.
-The `size` attribute indicates the number of nodes in the tree.
-When `size` is `0`, `root` is always `nil`.
-
-Example:
-
-```ruby
-require 'tree/red_black'
-
-rbt = Tree::RedBlack.new
-p rbt.root                #=> nil
-p rbt.size                #=> 0
-p rbt.allow_duplicates?   #=> true
-```
-
-### insert(value, ...) &#8594; red_black_tree
-
-Inserts a value or sequence of values in a Red-Black tree and
-increments the `size` attribute by the number of values inserted.
-
-Since a Red-Black tree maintains an ordered, Enumerable collection,
-every value inserted must be comparable with every other value.
-Methods `each`, `map`, `select`, `find`, `sort`, etc., can be applied
-directly to the tree.
-
-The individual nodes yielded by enumeration respond to method `key` to
-retrieve the value stored in that node. Method `each`, in particular,
-is aliased to `in_order`, so that nodes are sorted in ascending order
-by `key` value. Nodes can also be traversed by method `pre_order`,
-e.g., to generate paths in the tree.
-
-Example:
-
-```ruby
-require 'tree/red_black'
-
-rbt = Tree::RedBlack.new
-rbt.insert(*1..10)        # #<Tree::RedBlack:0x00...>
-p rbt.size                #=> 10
-rbt.map(&:key)            #=> [1, 2, ..., 10]
-rbt.select { |node| node.key % 2 == 0 }.map(&:key)
-                          #=> [2, 4, ..., 10]
-```
-
-### delete(value, ...) &#8594; red_black_tree
-
-Deletes a value or sequence of values from a Red-Black tree.
-
-Example:
-
-```ruby
-require 'tree/red_black'
-
-rbt = Tree::RedBlack.new
-rbt.insert(*1..10)        # #<Tree::RedBlack:0x00...>
-p rbt.size                #=> 10
-rbt.delete(*4..8)         # #<Tree::RedBlack:0x00...>
-p rbt.size                #=> 5
-rbt.map(&:key)            #=> [1, 2, 3, 9, 10]
-```
-
-### search(value, ifnone = nil) &#8594; red_black_node
-
-Returns a Red-Black tree node whose `key` matches `value` by binary
-search. If no match is found, calls non-nil `ifnone`, otherwise
-returns `nil`.
-
-Example:
-
-```ruby
-require 'tree/red_black'
-
-shuffled_values = [*1..10].shuffle
-rbt = shuffled_values.reduce(Tree::RedBlack.new) do |acc, v|
-  acc.insert(v)
-end
-rbt.search(7)             #=> <Tree::RedBlackNode:0x00..., @key=7, ...>
-```
-
-### bsearch { |node| block } &#8594; red_black_node
-
-Returns a Red-Black tree node satisfying a criterion defined in
-`block` by binary search.
-
-If `block` evaluates to `true` or `false`, returns the first node for
-which the `block` evaluates to `true`. In this case, the criterion is
-expected to return `false` for nodes preceding the matching node and
-`true` for subsequent nodes.
-
-Example:
-
-```ruby
-require 'tree/red_black'
-
-shuffled_values = [*1..10].shuffle
-rbt = shuffled_values.reduce(Tree::RedBlack.new) do |acc, v|
-  acc.insert(v)
-end
-rbt.bsearch { |node| node.key >= 7 }
-                          #=> <Tree::RedBlackNode:0x00..., @key=7, ...>
-```
-
-If `block` evaluates to `<0`, `0` or `>0`, returns first node for
-which `block` evaluates to `0`. Otherwise returns `nil`. In this case,
-the criterion is expected to return `<0` for nodes preceding the
-matching node, `0` for some subsequent nodes and `>0` for nodes beyond
-that.
-
-Example:
-
-```ruby
-require 'tree/red_black'
-
-shuffled_values = [*1..10].shuffle
-rbt = shuffled_values.reduce(Tree::RedBlack.new) do |acc, v|
-  acc.insert(v)
-end
-rbt.bsearch { |node| 7 <=> node.key }
-                          #=> <Tree::RedBlackNode:0x00..., @key=7, ...>
-```
-
-If `block` is not given, returns an enumerator.
-
-### pre_order &#8594; node_enumerator
-
-Returns an enumerator for nodes in a Red-Black tree by pre-order
-traversal.
-
-Example:
-
-```ruby
-require 'tree/red_black'
-
-rbt = Tree::RedBlack.new
-shuffled_values = [*1..10].shuffle  #=> [5, 9, 10, 8, 7, 6, 1, 2, 4, 3]
-rbt.insert(*shuffled_values)        #=> #<Tree::RedBlack:0x00...>
-rbt.pre_order.map(&:key)            #=> [7, 5, 2, 1, 4, 3, 6, 9, 8, 10]
-```
-
-### in_order &#8594; node_enumerator
-
-Returns an enumerator for nodes in a Red-Black tree by in-order
-traversal. The `each` method is aliased to `in_order`.
-
-Example:
-
-```ruby
-require 'tree/red_black'
-
-rbt = Tree::RedBlack.new
-shuffled_values = [*1..10].shuffle
-rbt.insert(*shuffled_values)
-rbt.in_order.map(&:key)             #=> [1, 2, ... 9, 10]
-```
-
-### dup &#8594; red_black_tree
-
-Returns a deep copy of a Red-Black tree, provided that the `dup`
-method for the `key` attribute of a tree node is also a deep copy.
-
-Example:
-
-```ruby
-require 'tree/red_black'
-
-rbt = Tree::RedBlack.new
-rbt.insert({a: 1, b: 2})
-rbt_copy = rbt.dup
-p rbt.root.key            #=> {:a=>1, :b=>2}
-p rbt.root.key.delete(:a) #=> 1
-p rbt.root.key            #=> {:b=>2}
-p rbt_copy.root.key       #=> {:a=>1, :b=>2}
 ```
 
 ## Contributing
