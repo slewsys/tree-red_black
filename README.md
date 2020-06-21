@@ -43,6 +43,14 @@ This implementation differs slightly from the Wikipedia description
 referenced above. In particular, leaf nodes are `nil`, which affects the
 details of node deletion.
 
+Included are two iRuby Jupyter notebooks for exploring Red-Black trees
+interactively:
+
+- [Graph Red-Black Tree](https://github.com/slewsys/tree-red_black/blob/master/contrib/Graph%20Red-Black%20Tree.ipynb) illustrates
+the operation of a Red-Black tree graphically.
+- [Schedule Reservation](https://github.com/slewsys/tree-red_black/blob/master/contrib/Schedule%20Reservation.ipynb) demonstrates a
+  Red-Black tree-based reservation system.
+
 ## Installation
 With a recent version of the [Ruby](https://www.ruby-lang.org/en/)
 interpreter installed (e.g., ruby 2.5), run the following commands

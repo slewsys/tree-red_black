@@ -65,9 +65,7 @@ def graph_red_black_tree(rbt, filename, title)
 
     i = 0
     rbt.in_order do |node|
-      parent = if count[node.key] == 1
-                 node.key
-               else
+      parent = if count[node.key] > 1
 
                  # left child...
                  if node == node.parent&.left
@@ -78,6 +76,8 @@ def graph_red_black_tree(rbt, filename, title)
                    instance[node] = instance[node.key]
                  end
                  "#{node.key}_#{instance[node]}"
+               else
+                 node.key
                end
 
       left_child = if node.left
