@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 require 'tree/red_black'
-require 'spec_helper'
+require_relative 'spec_helper'
 
 RSpec.describe Tree::RedBlack do
   context 'new' do

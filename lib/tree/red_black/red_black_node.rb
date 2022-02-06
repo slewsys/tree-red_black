@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+# frozen_string_literal: true
+
 module Tree
   ##
   # Tree::RedBlackNode is a pure-Ruby implementation of a
@@ -17,7 +18,7 @@ module Tree
   # Tree::RedBlack API provides a cleaner way of working with
   # Red-Black trees. Start there if only using the Red-Black tree as a
   # container.
-
+  #
   class RedBlackNode
     include Enumerable
 
@@ -51,7 +52,7 @@ module Tree
     #     p root.right            #=> nil
 
     def initialize(value = nil, color = :RED)
-      raise "color must be :RED or :BLACK" unless [:RED, :BLACK].include?(color)
+      raise "color must be :RED or :BLACK" unless %i[RED BLACK].include?(color)
 
       @left = @right = @parent = nil
       @key = value
@@ -152,14 +153,12 @@ module Tree
         right ? right.delete_red_black(value) : nil
       elsif value < key
         left ? left.delete_red_black(value) : nil
+      elsif left && right
+        node = right.min
+        @key = node.key
+        node.substitute_with_child
       else
-        if left && right
-          node = right.min
-          @key = node.key
-          node.substitute_with_child
-        else
-          substitute_with_child
-        end
+        substitute_with_child
       end
     end
 
@@ -233,21 +232,19 @@ module Tree
       result = block.call(self)
       case result
       when Integer
-        if result > 0
+        if result.positive?
           right ? right.bsearch(&block) : nil
-        elsif result < 0
+        elsif result.negative?
           left ? left.bsearch(&block) : nil
         else
           self
         end
       when TrueClass, FalseClass
         if result
-          left ? (node = left.bsearch(&block); node ? node : self) : self
+          left && (node = left.bsearch(&block)) ? node : self
         else
           right ? right.bsearch(&block) : nil
         end
-      else
-        nil
       end
     end
 
@@ -590,7 +587,8 @@ module Tree
         @color = :BLACK
       else
         if child_sibling.color == :BLACK
-          if ((child_sibling.right.nil? || child_sibling.right.color == :BLACK) &&
+          if ((child_sibling.right.nil? ||
+               child_sibling.right.color == :BLACK) &&
               child_sibling.left&.color  == :RED)
             child_sibling.color = :RED
             child_sibling.left.color = :BLACK

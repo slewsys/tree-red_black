@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-# coding: UTF-8
+# frozen_string_literal: true
 
 require 'tree/red_black/red_black_node'
 
 module Tree
-
   ##
   # Tree::RedBlack is a pure-Ruby implementation of a
   # {Red-Black tree}[https://en.wikipedia.org/wiki/Red–black_tree] --
@@ -17,7 +15,7 @@ module Tree
   # The implementation differs slightly from the Wikipedia description
   # referenced above. In particular, leaf nodes are +nil+, which
   # affects the details of node deletion.
-
+  #
   class RedBlack
     include Enumerable
 
@@ -80,8 +78,11 @@ module Tree
 
     def insert(*values)
       values.each do |value; new_root|
-        new_root = (root.nil? ? RedBlackNode.new(value, :BLACK) :
-                    root.insert_red_black(value, @allow_duplicates))
+        new_root = if root.nil?
+                     RedBlackNode.new(value, :BLACK)
+                   else
+                     root.insert_red_black(value, @allow_duplicates)
+                   end
         unless new_root.nil?
           @root = new_root
           @size += 1
